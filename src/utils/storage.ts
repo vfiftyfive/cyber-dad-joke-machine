@@ -1,11 +1,15 @@
-
-// Utility functions for localStorage operations
+// Utility functions for localStorage and environment variables
 
 const STORAGE_KEYS = {
   API_KEY: 'openai_api_key'
 };
 
 export const getApiKey = (): string => {
+  // Get API key from environment variable
+  const envApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (envApiKey) return envApiKey;
+  
+  // Fallback to localStorage if not in environment
   return localStorage.getItem(STORAGE_KEYS.API_KEY) || '';
 };
 

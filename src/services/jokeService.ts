@@ -12,10 +12,12 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
   const apiKey = getApiKey();
   
   if (!apiKey) {
+    console.error("No API key found in environment variables or local storage");
+    toast.error("API key not configured");
     return { 
       joke: "", 
       loading: false, 
-      error: "No API key provided. Please configure your OpenAI API key in settings." 
+      error: "No API key available" 
     };
   }
 
@@ -62,7 +64,7 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
     // Check for API key related errors
     const errorMsg = error.message || "";
     if (errorMsg.includes("API key") || errorMsg.includes("auth") || errorMsg.includes("Authentication")) {
-      toast.error("Invalid API key. Please check your settings.");
+      toast.error("Invalid API key. Please check your environment variables.");
     } else {
       toast.error("Failed to fetch joke. Please try again.");
     }

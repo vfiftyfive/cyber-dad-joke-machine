@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -6,7 +5,6 @@ import JokeButton from '../components/JokeButton';
 import JokeDisplay from '../components/JokeDisplay';
 import Settings from '../components/Settings';
 import { fetchDadJoke } from '../services/jokeService';
-import { getApiKey } from '../utils/storage';
 
 const Index: React.FC = () => {
   const [joke, setJoke] = useState<string>('');
@@ -14,21 +12,10 @@ const Index: React.FC = () => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
 
   const handleGenerateJoke = async () => {
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      setShowSettings(true);
-      toast.error('Please set your OpenAI API key in settings first');
-      return;
-    }
-
     setIsLoading(true);
     try {
       const response = await fetchDadJoke();
-      if (response.error) {
-        if (response.error.includes("API key")) {
-          setShowSettings(true);
-        }
-      } else if (response.joke) {
+      if (response.joke) {
         setJoke(response.joke);
       }
     } catch (error) {
