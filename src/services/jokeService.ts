@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { getApiKey } from "../utils/storage";
 
@@ -39,23 +40,23 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
         "Expires": "0",
       },
       body: JSON.stringify({
-        model: "gpt-4o",  // Using the more powerful model for more variety
+        model: "gpt-4o",  // Keep using the more powerful model for better jokes
         messages: [
           {
             role: "system",
-            content: "You are a dad joke generator. Generate ONLY original, funny dad jokes that are COMPLETELY DIFFERENT from anything you've generated before. Never repeat jokes. Each joke must be unique. Respond with ONLY the joke text, nothing else."
+            content: "You are a dad joke generator. Generate original, funny dad jokes that are different each time. Each joke should be clean, appropriate, and follow the classic dad joke format - usually involving a pun or wordplay. Respond with ONLY the joke text, nothing else."
           },
           {
             role: "user",
-            content: `Tell me a completely original dad joke I've never heard before. Make it unique and different from standard ones. Use this random seed: ${seed} and timestamp: ${timestamp} to ensure uniqueness.`
+            content: `Tell me an original dad joke that I haven't heard before. Make it coherent and clever. Use this random seed: ${seed} and timestamp: ${timestamp} to ensure uniqueness.`
           }
         ],
-        temperature: 1.8,  // Increased for more randomness
-        top_p: 1.0,
-        frequency_penalty: 1.5,  // Increased to strongly discourage repetition
-        presence_penalty: 1.5,    // Increased to strongly encourage new content
+        temperature: 0.9,  // Lowered to balance creativity with coherence
+        top_p: 0.95,       // Slight filtering to avoid the most improbable tokens
+        frequency_penalty: 0.7,  // Reduced to discourage repetition but not too aggressively
+        presence_penalty: 0.7,   // Reduced to encourage new content but not excessively
         max_tokens: 150,
-        user: `user_${timestamp}_${seed}`,  // Add a unique user identifier
+        user: `user_${timestamp}_${seed}`,  // Keep unique identifier
       }),
     });
 
