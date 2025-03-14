@@ -1,24 +1,34 @@
 
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { Settings as SettingsIcon } from 'lucide-react';
 import JokeButton from '../components/JokeButton';
 import JokeDisplay from '../components/JokeDisplay';
+import Settings from '../components/Settings';
 import { fetchDadJoke } from '../services/jokeService';
+import { getApiKey } from '../utils/storage';
 
 const Index: React.FC = () => {
   const [joke, setJoke] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   const handleGenerateJoke = async () => {
-    if (!import.meta.env.VITE_OPENAI_API_KEY) {
-      toast.error('Please set your OpenAI API key in the environment variables (VITE_OPENAI_API_KEY)');
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      setShowSettings(true);
+      toast.error('Please set your OpenAI API key in settings first');
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await fetchDadJoke();
-      if (response.joke) {
+      if (response.error) {
+        if (response.error.includes("API key")) {
+          setShowSettings(true);
+        }
+      } else if (response.joke) {
         setJoke(response.joke);
       }
     } catch (error) {
@@ -29,7 +39,15 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
+      <button 
+        onClick={() => setShowSettings(true)}
+        className="absolute top-6 right-6 text-cyber-blue/70 hover:text-cyber-blue transition-colors p-2 bg-black/30 rounded-full"
+        aria-label="Open settings"
+      >
+        <SettingsIcon size={20} />
+      </button>
+
       <div className="w-full max-w-4xl flex flex-col items-center">
         <div className="text-center mb-12">
           <div className="inline-block px-3 py-1 bg-cyber-blue/10 backdrop-blur-sm border border-cyber-blue/20 rounded-full mb-4">
@@ -71,10 +89,11 @@ const Index: React.FC = () => {
         </div>
 
         <div className="mt-10 text-xs text-cyber-blue/50 font-mono text-center">
-          <p>* API key required. Set VITE_OPENAI_API_KEY in your environment.</p>
           <p className="mt-1">* Powered by OpenAI's GPT models.</p>
         </div>
       </div>
+
+      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 };

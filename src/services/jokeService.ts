@@ -1,5 +1,6 @@
 
 import { toast } from "sonner";
+import { getApiKey } from "../utils/storage";
 
 interface JokeResponse {
   joke: string;
@@ -8,12 +9,22 @@ interface JokeResponse {
 }
 
 export const fetchDadJoke = async (): Promise<JokeResponse> => {
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    return { 
+      joke: "", 
+      loading: false, 
+      error: "No API key provided. Please configure your OpenAI API key in settings." 
+    };
+  }
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
@@ -47,7 +58,15 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
     return { joke, loading: false, error: null };
   } catch (error: any) {
     console.error("Error fetching dad joke:", error);
-    toast.error("Failed to fetch joke. Please try again.");
+    
+    // Check for API key related errors
+    const errorMsg = error.message || "";
+    if (errorMsg.includes("API key") || errorMsg.includes("auth") || errorMsg.includes("Authentication")) {
+      toast.error("Invalid API key. Please check your settings.");
+    } else {
+      toast.error("Failed to fetch joke. Please try again.");
+    }
+    
     return { joke: "", loading: false, error: error.message };
   }
 };
