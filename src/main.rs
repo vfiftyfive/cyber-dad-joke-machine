@@ -1,75 +1,90 @@
+mod config;
+
 use axum::{
     routing::get,
     Router,
     Json,
     http::{HeaderValue, Method, header},
+    extract::State,
 };
+use async_openai::{Client, config::OpenAIConfig, types::{CreateChatCompletionRequestArgs, ChatCompletionRequestMessage, Role}};
 use serde::Serialize;
 use tower_http::cors::CorsLayer;
-use rand::{Rng, thread_rng};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[derive(Serialize)]
 struct JokeResponse {
     joke: String,
 }
 
-struct JokeState {
-    all_jokes: Vec<&'static str>,
-    available_jokes: Vec<&'static str>,
+struct AppState {
+    openai_client: Client<OpenAIConfig>,
 }
 
-impl JokeState {
-    fn new(jokes: Vec<&'static str>) -> Self {
-        Self {
-            available_jokes: jokes.clone(),
-            all_jokes: jokes,
-        }
-    }
+async fn generate_dad_joke(State(state): State<Arc<AppState>>) -> Json<JokeResponse> {
+    println!("Generating new dad joke...");
+    let request = CreateChatCompletionRequestArgs::default()
+        .model("gpt-3.5-turbo")
+        .messages([
+            ChatCompletionRequestMessage {
+                role: Role::System,
+                content: Some("You are a dad joke generator. Generate a short, family-friendly dad joke. \
+                         Respond with ONLY the joke text, no additional commentary or formatting. \
+                         The joke should be no more than 2 sentences long.".to_string()),
+                name: None,
+                function_call: None,
+            },
+            ChatCompletionRequestMessage {
+                role: Role::User,
+                content: Some("Generate a dad joke".to_string()),
+                name: None,
+                function_call: None,
+            }
+        ])
+        .max_tokens(100_u16)
+        .temperature(0.7)
+        .build()
+        .expect("Failed to build request");
 
-    fn get_random_joke(&mut self) -> String {
-        if self.available_jokes.is_empty() {
-            println!("Refilling joke pool...");
-            self.available_jokes = self.all_jokes.clone();
+    println!("Sending request to OpenAI...");
+    let response = match state.openai_client.chat().create(request).await {
+        Ok(resp) => resp,
+        Err(e) => {
+            println!("Error from OpenAI: {:?}", e);
+            return Json(JokeResponse {
+                joke: "Why did the API call fail? Because it couldn't handle the dad joke pressure!".to_string()
+            });
         }
-        
-        let index = thread_rng().gen_range(0..self.available_jokes.len());
-        let joke = self.available_jokes.swap_remove(index);
-        println!("Jokes remaining: {}", self.available_jokes.len());
-        joke.to_string()
-    }
+    };
+    println!("Received response from OpenAI");
+
+    let joke = response.choices[0]
+        .message
+        .content
+        .clone()
+        .unwrap_or_else(|| "Why did the API call fail? Because it couldn't handle the dad joke pressure!".to_string());
+
+    Json(JokeResponse { joke })
 }
 
 #[tokio::main]
 async fn main() {
-    let jokes = vec![
-        "Why don't programmers like nature? It has too many bugs.",
-        "Why did the programmer quit his job? Because he didn't get arrays.",
-        "What do you call a dad who's fallen through the ice? A POPsicle!",
-        "Why did the scarecrow win an award? Because he was outstanding in his field!",
-        "Why don't eggs tell jokes? They'd crack up!",
-        "What did the coffee report to the police? A mugging!",
-        "What do you call a fake noodle? An impasta!",
-        "Why did the math book look so sad? Because it had too many problems.",
-        "What do you call a bear with no teeth? A gummy bear!",
-        "What do you call a can opener that doesn't work? A can't opener!",
-    ];
-
-    let joke_state = Arc::new(Mutex::new(JokeState::new(jokes)));
+    // Load configuration
+    let settings = config::Settings::new().expect("Failed to load configuration");
+    
+    // Initialize OpenAI client
+    let config = OpenAIConfig::new().with_api_key(settings.openai_api_key);
+    let openai_client = Client::with_config(config);
+    let app_state = Arc::new(AppState { openai_client });
 
     let app = Router::new()
-        .route("/joke", get(move || {
-            let joke_state = joke_state.clone();
-            async move {
-                let joke = joke_state.lock().unwrap().get_random_joke();
-                Json(JokeResponse { joke })
-            }
-        }))
+        .route("/joke", get(generate_dad_joke))
+        .with_state(app_state)
         .layer(
             CorsLayer::new()
                 .allow_origin("http://localhost:8080".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET])
-                .allow_headers(["Content-Type", "Accept"])
+                .allow_headers([header::CONTENT_TYPE, header::ACCEPT])
         );
 
     println!("Server running on http://localhost:3000");
