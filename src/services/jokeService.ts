@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { getApiKey } from "../utils/storage";
 
@@ -7,6 +6,9 @@ interface JokeResponse {
   loading: boolean;
   error: string | null;
 }
+
+// Keep track of previously seen jokes to avoid repetition
+const seenJokes = new Set<string>();
 
 export const fetchDadJoke = async (): Promise<JokeResponse> => {
   const apiKey = getApiKey();
@@ -22,8 +24,9 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
   }
 
   try {
-    // Add a timestamp to prevent potential caching
+    // Add a unique seed value and timestamp to force variation
     const timestamp = new Date().getTime();
+    const seed = Math.random().toString(36).substring(2, 15);
     
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -36,22 +39,23 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
         "Expires": "0",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",  // Using the more powerful model for more variety
         messages: [
           {
             role: "system",
-            content: "You are a dad joke generator. Your job is to create original, funny dad jokes that are different each time. Never repeat the same joke twice. Respond with only the joke text, no additional explanations."
+            content: "You are a dad joke generator. Generate ONLY original, funny dad jokes that are COMPLETELY DIFFERENT from anything you've generated before. Never repeat jokes. Each joke must be unique. Respond with ONLY the joke text, nothing else."
           },
           {
             role: "user",
-            content: `Tell me a fresh, original dad joke that I haven't heard before. Current timestamp: ${timestamp}`
+            content: `Tell me a completely original dad joke I've never heard before. Make it unique and different from standard ones. Use this random seed: ${seed} and timestamp: ${timestamp} to ensure uniqueness.`
           }
         ],
-        temperature: 1.5,
-        top_p: 0.9,
-        frequency_penalty: 1.0,
-        presence_penalty: 1.0,
-        max_tokens: 100
+        temperature: 1.8,  // Increased for more randomness
+        top_p: 1.0,
+        frequency_penalty: 1.5,  // Increased to strongly discourage repetition
+        presence_penalty: 1.5,    // Increased to strongly encourage new content
+        max_tokens: 150,
+        user: `user_${timestamp}_${seed}`,  // Add a unique user identifier
       }),
     });
 
@@ -65,6 +69,24 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
     
     if (!joke) {
       throw new Error("No joke was returned from the API");
+    }
+
+    // Check if we've seen this joke before
+    if (seenJokes.has(joke)) {
+      console.log("Duplicate joke detected, fetching a new one");
+      // If this is a duplicate, try again with a different seed
+      return fetchDadJoke();
+    }
+
+    // Add this joke to our seen jokes set
+    seenJokes.add(joke);
+    
+    // Limit the size of the set to prevent memory issues
+    if (seenJokes.size > 100) {
+      // Convert to array, remove the oldest joke, convert back to set
+      const jokesArray = Array.from(seenJokes);
+      seenJokes.clear();
+      jokesArray.slice(1).forEach(j => seenJokes.add(j));
     }
 
     return { joke, loading: false, error: null };
