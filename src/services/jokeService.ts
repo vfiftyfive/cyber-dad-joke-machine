@@ -33,14 +33,17 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
         messages: [
           {
             role: "system",
-            content: "You are a dad joke generator. Respond with only a short, funny dad joke. No explanations or other text."
+            content: "You are a dad joke generator. Respond with only a short, funny dad joke. Ensure each joke is unique and different from previous ones. No explanations or other text."
           },
           {
             role: "user",
-            content: "Tell me a dad joke"
+            content: "Tell me a fresh dad joke that's different from standard ones"
           }
         ],
-        temperature: 1.2,
+        temperature: 1.5,
+        top_p: 0.9,
+        frequency_penalty: 0.8,
+        presence_penalty: 0.6,
         max_tokens: 100
       }),
     });
