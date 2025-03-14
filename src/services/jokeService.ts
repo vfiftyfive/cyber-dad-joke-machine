@@ -40,7 +40,7 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
         "Expires": "0",
       },
       body: JSON.stringify({
-        model: "gpt-4o",  // Keep using the more powerful model for better jokes
+        model: "gpt-3.5-turbo",  // Changed from gpt-4o to gpt-3.5-turbo
         messages: [
           {
             role: "system",
@@ -51,10 +51,10 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
             content: `Tell me an original dad joke that I haven't heard before. Make it coherent and clever. Use this random seed: ${seed} and timestamp: ${timestamp} to ensure uniqueness.`
           }
         ],
-        temperature: 0.9,  // Lowered to balance creativity with coherence
+        temperature: 0.9,  // Keep balanced temperature for creativity with coherence
         top_p: 0.95,       // Slight filtering to avoid the most improbable tokens
-        frequency_penalty: 0.7,  // Reduced to discourage repetition but not too aggressively
-        presence_penalty: 0.7,   // Reduced to encourage new content but not excessively
+        frequency_penalty: 0.7,  // Discourage repetition but not too aggressively
+        presence_penalty: 0.7,   // Encourage new content but not excessively
         max_tokens: 150,
         user: `user_${timestamp}_${seed}`,  // Keep unique identifier
       }),
