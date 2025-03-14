@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -10,13 +11,20 @@ const Index: React.FC = () => {
   const [joke, setJoke] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  // Add a key to force re-render of the joke display component
+  const [jokeKey, setJokeKey] = useState<number>(0);
 
   const handleGenerateJoke = async () => {
     setIsLoading(true);
     try {
+      // Clear previous joke immediately to avoid seeing the same joke while loading
+      setJoke('');
+      
       const response = await fetchDadJoke();
       if (response.joke) {
         setJoke(response.joke);
+        // Increment key to force a re-render of the joke display
+        setJokeKey(prev => prev + 1);
       }
     } catch (error) {
       console.error('Error generating joke:', error);
@@ -69,7 +77,7 @@ const Index: React.FC = () => {
           />
         </div>
 
-        <JokeDisplay joke={joke} isLoading={isLoading} />
+        <JokeDisplay key={jokeKey} joke={joke} isLoading={isLoading} />
 
         <div className="mt-12">
           <JokeButton onClick={handleGenerateJoke} isLoading={isLoading} />

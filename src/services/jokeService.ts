@@ -22,28 +22,35 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
   }
 
   try {
+    // Add a timestamp to prevent potential caching
+    const timestamp = new Date().getTime();
+    
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
+        // Add cache control headers
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are a dad joke generator. Respond with only a short, funny dad joke. Ensure each joke is unique and different from previous ones. No explanations or other text."
+            content: "You are a dad joke generator. Your job is to create original, funny dad jokes that are different each time. Never repeat the same joke twice. Respond with only the joke text, no additional explanations."
           },
           {
             role: "user",
-            content: "Tell me a fresh dad joke that's different from standard ones"
+            content: `Tell me a fresh, original dad joke that I haven't heard before. Current timestamp: ${timestamp}`
           }
         ],
         temperature: 1.5,
         top_p: 0.9,
-        frequency_penalty: 0.8,
-        presence_penalty: 0.6,
+        frequency_penalty: 1.0,
+        presence_penalty: 1.0,
         max_tokens: 100
       }),
     });
