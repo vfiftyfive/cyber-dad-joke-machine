@@ -8,29 +8,21 @@ import { fetchDadJoke } from '../services/jokeService';
 const Index: React.FC = () => {
   const [joke, setJoke] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleGenerateJoke = async () => {
     if (!import.meta.env.VITE_OPENAI_API_KEY) {
       toast.error('Please set your OpenAI API key in the environment variables (VITE_OPENAI_API_KEY)');
-      setError('Missing OpenAI API key. Please set VITE_OPENAI_API_KEY in your environment variables.');
       return;
     }
 
     setIsLoading(true);
-    setError(null);
-    
     try {
       const response = await fetchDadJoke();
       if (response.joke) {
         setJoke(response.joke);
       }
-      if (response.error) {
-        setError(response.error);
-      }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error generating joke:', error);
-      setError(error.message || 'Failed to generate joke');
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +64,7 @@ const Index: React.FC = () => {
           />
         </div>
 
-        <JokeDisplay joke={joke} isLoading={isLoading} error={error} />
+        <JokeDisplay joke={joke} isLoading={isLoading} />
 
         <div className="mt-12">
           <JokeButton onClick={handleGenerateJoke} isLoading={isLoading} />

@@ -9,25 +9,14 @@ interface JokeResponse {
 
 export const fetchDadJoke = async (): Promise<JokeResponse> => {
   try {
-    // First check if API key is available
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      console.error("Missing OpenAI API key");
-      return { 
-        joke: "", 
-        loading: false, 
-        error: "OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your environment variables." 
-      };
-    }
-
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", // Fallback to a more reliable model
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -44,20 +33,8 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      let errorMessage = "Failed to fetch joke";
-      
-      try {
-        // Try to parse as JSON to get the error message
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.error?.message || errorMessage;
-      } catch (e) {
-        // If not JSON, use the text as is
-        errorMessage = errorText || errorMessage;
-      }
-      
-      console.error("API Error:", errorMessage);
-      throw new Error(errorMessage);
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Failed to fetch joke");
     }
 
     const data = await response.json();
@@ -69,9 +46,8 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
 
     return { joke, loading: false, error: null };
   } catch (error: any) {
-    const errorMessage = error.message || "An unknown error occurred";
-    console.error("Error fetching dad joke:", errorMessage);
-    toast.error("Failed to fetch joke: " + errorMessage);
-    return { joke: "", loading: false, error: errorMessage };
+    console.error("Error fetching dad joke:", error);
+    toast.error("Failed to fetch joke. Please try again.");
+    return { joke: "", loading: false, error: error.message };
   }
 };

@@ -1,14 +1,12 @@
 
 import React, { useEffect, useRef } from 'react';
-import { AlertTriangle } from 'lucide-react';
 
 interface JokeDisplayProps {
   joke: string;
   isLoading: boolean;
-  error?: string | null;
 }
 
-const JokeDisplay: React.FC<JokeDisplayProps> = ({ joke, isLoading, error }) => {
+const JokeDisplay: React.FC<JokeDisplayProps> = ({ joke, isLoading }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,13 +36,6 @@ const JokeDisplay: React.FC<JokeDisplayProps> = ({ joke, isLoading, error }) => 
                  }} />
           </div>
           <span className="text-sm font-mono animate-pulse">SCANNING HUMOR DATABASE...</span>
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center gap-3 text-destructive">
-          <AlertTriangle size={28} className="animate-pulse" />
-          <p className="font-mono text-base">
-            {error}
-          </p>
         </div>
       ) : joke ? (
         <p 
