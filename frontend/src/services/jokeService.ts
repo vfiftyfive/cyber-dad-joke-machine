@@ -8,7 +8,13 @@ interface JokeResponse {
 
 export const fetchDadJoke = async (): Promise<JokeResponse> => {
   try {
-    const response = await fetch("http://localhost:3000/joke", {
+    // In development, use localhost:8000
+    // In production, use relative URL since frontend and backend are in same container
+    const API_URL = import.meta.env.PROD
+      ? '/joke'
+      : 'http://localhost:8000/joke';
+
+    const response = await fetch(API_URL, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

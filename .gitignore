@@ -7,7 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+/target
+
+# Build output
 dist
 dist-ssr
 *.local
@@ -19,14 +23,17 @@ dist-ssr
 .DS_Store
 *.suo
 *.ntvs*
-
-# Environment variables
-.env
 *.njsproj
 *.sln
 *.sw?
 
+# Environment and secrets
+.env
+.env.*
+Secrets.toml
+Secrets.*.toml
+!Secrets.example.toml
 
-# Added by cargo
-
-/target
+# Shuttle specific
+.shuttle-storage
+.shuttle-cache

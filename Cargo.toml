@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.6.0", features = ["headers"] }
-tokio = { version = "1.0", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tower-http = { version = "0.3.0", features = ["cors"] }
-rand = "0.8"
-async-openai = "0.14.3"
-dotenv = "0.15.0"
-config = "0.13.3"
+async-openai = "0.28.0"
+axum = "0.7.4"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+shuttle-axum = { version = "0.53.0", default-features = false, features = ["axum-0-7"] }
+shuttle-openai = "0.53.0"
+shuttle-runtime = "0.53.0"
+tokio = { version = "1.28.2", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.6.2", features = ["cors"] }
+tracing = "0.1.40"

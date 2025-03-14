@@ -1,69 +1,92 @@
-# Welcome to your Lovable project
+# Cyber Dad Joke Machine
 
-## Project info
+A web application that generates dad jokes using OpenAI's GPT-3.5-turbo model. Built with Rust (Axum) for the backend and React + TypeScript for the frontend.
 
-**URL**: https://lovable.dev/projects/c81d6879-eec4-4e97-a69e-2d94973960e0
+## Technologies Used
 
-## How can I edit this code?
+### Backend
+- Rust
+- Axum web framework
+- OpenAI API (GPT-3.5-turbo)
+- Shuttle for deployment
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/c81d6879-eec4-4e97-a69e-2d94973960e0) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
+### Frontend
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Local Development
 
-Simply open [Lovable](https://lovable.dev/projects/c81d6879-eec4-4e97-a69e-2d94973960e0) and click on Share -> Publish.
+### Backend Setup
 
-## I want to use a custom domain - is that possible?
+1. Install Rust and Cargo
+2. Install Shuttle CLI:
+```bash
+cargo install cargo-shuttle
+```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+3. Create a `Secrets.toml` file in the project root and add your OpenAI API key:
+```toml
+OPENAI_API_KEY = "your-api-key-here"
+```
+
+4. Run the backend locally:
+```bash
+cargo shuttle run
+```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+## Deployment
+
+### Backend Deployment with Shuttle
+
+1. Login to Shuttle:
+```bash
+cargo shuttle login
+```
+
+2. Initialize your project (first time only):
+```bash
+cargo shuttle init
+```
+
+3. Add your OpenAI API key to Shuttle secrets:
+```bash
+cargo shuttle secrets set OPENAI_API_KEY=your-api-key-here
+```
+
+4. Deploy your application:
+```bash
+cargo shuttle deploy
+```
+
+Once deployed, your backend will be available at `https://cyber-dad-joke-machine.shuttleapp.rs`
+
+### Frontend Deployment
+
+The frontend can be deployed to any static hosting service like Netlify, Vercel, or GitHub Pages. Make sure to set the `NODE_ENV` to 'production' during build to use the correct backend URL.
+
+## Security Notes
+
+- The OpenAI API key is stored securely using Shuttle's secret management system
+- CORS is configured to allow requests only from specified origins
+- API keys and sensitive data are never committed to the repository
+- Environment-based configuration ensures proper separation of development and production settings
