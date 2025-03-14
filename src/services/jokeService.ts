@@ -38,7 +38,7 @@ export const fetchDadJoke = async (): Promise<JokeResponse> => {
             content: "Tell me a dad joke"
           }
         ],
-        temperature: 0.7,
+        temperature: 1.2,
         max_tokens: 100
       }),
     });
