@@ -15,7 +15,7 @@ use sqlx::{FromRow, PgPool};
 use state::AppState;
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::services::{ServeDir, ServeFile};
-use tracing::{info, error};
+use tracing::{info, error, debug, instrument};
 use time;
 
 #[derive(Serialize, Deserialize)]
@@ -50,6 +50,7 @@ impl Serialize for JokeRecord {
     }
 }
 
+#[instrument(skip(state), level = "debug")]
 async fn generate_dad_joke(State(state): State<AppState>) -> Result<Json<JokeResponse>, (StatusCode, String)> {
     info!("Generating new dad joke");
     
@@ -117,12 +118,16 @@ async fn generate_dad_joke(State(state): State<AppState>) -> Result<Json<JokeRes
     Ok(Json(JokeResponse { joke: joke_text, id: joke_id }))
 }
 
+#[instrument]
 async fn health_check() -> &'static str {
+    debug!("Health check requested");
     "OK"
 }
 
+#[instrument(skip(state), fields(joke_length = joke_text.len()), level = "debug")]
 async fn save_joke_to_db(state: &AppState, joke_text: &str) -> Result<i32, sqlx::Error> {
     // Insert the joke into the database
+    debug!("Saving joke to database");
     let record = sqlx::query_as::<_, JokeRecord>(
         "INSERT INTO jokes (joke_text) VALUES ($1) RETURNING id, joke_text, created_at"
     )
@@ -133,13 +138,21 @@ async fn save_joke_to_db(state: &AppState, joke_text: &str) -> Result<i32, sqlx:
     Ok(record.id)
 }
 
+#[instrument(skip(state), level = "debug")]
 async fn get_recent_jokes(State(state): State<AppState>) -> Result<Json<Vec<JokeRecord>>, (StatusCode, String)> {
+    info!("Retrieving recent jokes");
     match sqlx::query_as::<_, JokeRecord>("SELECT id, joke_text, created_at FROM jokes ORDER BY created_at DESC LIMIT 10")
         .fetch_all(&state.pool)
         .await
     {
-        Ok(jokes) => Ok(Json(jokes)),
-        Err(e) => Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string())),
+        Ok(jokes) => {
+            info!(joke_count = jokes.len(), "Successfully retrieved recent jokes");
+            Ok(Json(jokes))
+        },
+        Err(e) => {
+            error!(error = %e, "Failed to retrieve recent jokes");
+            Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
+        },
     }
 }
 
@@ -148,10 +161,14 @@ async fn main(
     #[shuttle_shared_db::Postgres] pool: PgPool,
     #[shuttle_openai::OpenAI(api_key = "{secrets.OPENAI_API_KEY}")] openai: Client<OpenAIConfig>,
 ) -> shuttle_axum::ShuttleAxum {
+    info!(version = env!("CARGO_PKG_VERSION"), "Starting Cyber Dad Joke Machine");
+    debug!("OpenAI client and database pool initialized");
     let state = AppState::new(openai, pool);
     
     // Initialize database
+    info!("Initializing database");
     state.seed().await;
+    debug!("Database initialization completed");
     
     // Configure CORS as specified in the memory
     let cors = CorsLayer::new()
@@ -172,7 +189,7 @@ async fn main(
                 .not_found_service(ServeFile::new("frontend/dist/index.html")),
         );
 
-    info!("Starting Cyber Dad Joke Machine");
+    info!("Cyber Dad Joke Machine server initialized and ready");
     Ok(router.into())
 }
 
