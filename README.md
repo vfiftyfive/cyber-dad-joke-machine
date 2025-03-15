@@ -19,7 +19,7 @@ A web application that generates dad jokes using OpenAI's GPT-3.5-turbo model. B
 
 ## Local Development
 
-### Backend Setup
+### Setup
 
 1. Install Rust and Cargo
 2. Install Shuttle CLI:
@@ -32,31 +32,45 @@ cargo install cargo-shuttle
 OPENAI_API_KEY = "your-api-key-here"
 ```
 
-4. Run the backend locally:
-```bash
-cargo shuttle run
-```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
+4. Install frontend dependencies:
 ```bash
 cd frontend
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-3. Start the development server:
+5. Build the frontend:
 ```bash
-npm run dev
+npm run build
 ```
 
-## Deployment
+6. Run the application locally:
+```bash
+# From the project root
+cargo shuttle run
+```
 
-### Backend Deployment with Shuttle
+The application will be available at:
+- Frontend (dev): http://localhost:8080
+- Backend API: http://localhost:8000/joke
+
+## Development Workflow
+
+1. For frontend development:
+```bash
+cd frontend
+npm run dev
+```
+This will run the frontend on port 8080 and make API requests to the backend on port 8000.
+
+2. After making frontend changes, build the frontend:
+```bash
+cd frontend
+npm run build
+```
+
+3. The backend will automatically serve the latest built frontend files.
+
+## Deployment
 
 1. Login to Shuttle:
 ```bash
@@ -73,20 +87,26 @@ cargo shuttle init
 cargo shuttle secrets set OPENAI_API_KEY=your-api-key-here
 ```
 
-4. Deploy your application:
+4. Build the frontend for production:
+```bash
+cd frontend
+npm run build
+cd ..
+```
+
+5. Deploy the application:
 ```bash
 cargo shuttle deploy
 ```
 
-Once deployed, your backend will be available at `https://cyber-dad-joke-machine.shuttleapp.rs`
+Once deployed, your application will be available at `https://cyber-dad-joke-machine-<nonce>.shuttleapp.rs`
 
-### Frontend Deployment
-
-The frontend can be deployed to any static hosting service like Netlify, Vercel, or GitHub Pages. Make sure to set the `NODE_ENV` to 'production' during build to use the correct backend URL.
+The deployment includes both the backend API and the frontend application, served from the same origin.
 
 ## Security Notes
 
 - The OpenAI API key is stored securely using Shuttle's secret management system
-- CORS is configured to allow requests only from specified origins
+- CORS is configured to allow requests only from localhost:8080 in development
 - API keys and sensitive data are never committed to the repository
 - Environment-based configuration ensures proper separation of development and production settings
+- In production, frontend and backend are served from the same origin, eliminating CORS concerns

@@ -1,2 +1,13 @@
 [default]
 name = "cyber-dad-joke-machine"
+
+[deploy]
+include = [
+  "frontend/dist/*", # include all files and subdirs in frontend/dist/
+]
+
+# Declare files that should be copied to the runtime image:
+[build]
+assets = [
+  "frontend/dist/*", # include all files and subdirs in frontend/dist/
+]

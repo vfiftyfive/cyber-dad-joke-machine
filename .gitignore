@@ -37,3 +37,5 @@ Secrets.*.toml
 # Shuttle specific
 .shuttle-storage
 .shuttle-cache
+.shuttle*
+Secrets*.toml
