@@ -8,6 +8,7 @@ A web application that generates dad jokes using OpenAI's GPT-3.5-turbo model. B
 - Rust
 - Axum web framework
 - OpenAI API (GPT-3.5-turbo)
+- PostgreSQL database
 - Shuttle for deployment
 
 ### Frontend
@@ -16,6 +17,10 @@ A web application that generates dad jokes using OpenAI's GPT-3.5-turbo model. B
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Database Integration
+
+This application uses a PostgreSQL database to store and retrieve dad jokes. The database is provisioned and managed by Shuttle, which simplifies deployment and scaling. Shuttle automatically handles database migrations and ensures that the database schema is up-to-date.
 
 ## Local Development
 
@@ -49,9 +54,8 @@ npm run build
 shuttle run
 ```
 
-The application will be available at:
-- Frontend (dev): http://localhost:8080
-- Backend API: http://localhost:8000/joke
+### Notes
+- The PostgreSQL database is automatically set up by Shuttle during deployment, so no manual database setup is needed for local development.
 
 ## Development Workflow
 

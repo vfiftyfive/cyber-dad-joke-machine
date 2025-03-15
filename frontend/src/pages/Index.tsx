@@ -1,29 +1,25 @@
-
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { History } from 'lucide-react';
 import JokeButton from '../components/JokeButton';
 import JokeDisplay from '../components/JokeDisplay';
-import Settings from '../components/Settings';
+import RecentJokes from '../components/RecentJokes';
 import { fetchDadJoke } from '../services/jokeService';
 
 const Index: React.FC = () => {
   const [joke, setJoke] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
-  // Add a key to force re-render of the joke display component
+  const [showRecentJokes, setShowRecentJokes] = useState<boolean>(false);
   const [jokeKey, setJokeKey] = useState<number>(0);
 
   const handleGenerateJoke = async () => {
     setIsLoading(true);
     try {
-      // Clear previous joke immediately to avoid seeing the same joke while loading
       setJoke('');
       
       const response = await fetchDadJoke();
       if (response.joke) {
         setJoke(response.joke);
-        // Increment key to force a re-render of the joke display
         setJokeKey(prev => prev + 1);
       }
     } catch (error) {
@@ -35,13 +31,15 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
-      <button 
-        onClick={() => setShowSettings(true)}
-        className="absolute top-6 right-6 text-cyber-blue/70 hover:text-cyber-blue transition-colors p-2 bg-black/30 rounded-full"
-        aria-label="Open settings"
-      >
-        <SettingsIcon size={20} />
-      </button>
+      <div className="absolute top-6 right-6">
+        <button 
+          onClick={() => setShowRecentJokes(true)}
+          className="text-cyber-blue/70 hover:text-cyber-blue transition-colors p-2 bg-black/30 rounded-full"
+          aria-label="Show recent jokes"
+        >
+          <History size={20} />
+        </button>
+      </div>
 
       <div className="w-full max-w-4xl flex flex-col items-center">
         <div className="text-center mb-12">
@@ -88,7 +86,7 @@ const Index: React.FC = () => {
         </div>
       </div>
 
-      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <RecentJokes isOpen={showRecentJokes} onClose={() => setShowRecentJokes(false)} />
     </div>
   );
 };
