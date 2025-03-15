@@ -24,7 +24,7 @@ A web application that generates dad jokes using OpenAI's GPT-3.5-turbo model. B
 1. Install Rust and Cargo
 2. Install Shuttle CLI:
 ```bash
-cargo install cargo-shuttle
+curl -sSfL https://www.shuttle.dev/install | bash
 ```
 
 3. Create a `Secrets.toml` file in the project root and add your OpenAI API key:
@@ -46,7 +46,7 @@ npm run build
 6. Run the application locally:
 ```bash
 # From the project root
-cargo shuttle run
+shuttle run
 ```
 
 The application will be available at:
@@ -74,32 +74,27 @@ npm run build
 
 1. Login to Shuttle:
 ```bash
-cargo shuttle login
+shuttle login
 ```
 
 2. Initialize your project (first time only):
 ```bash
-cargo shuttle init
+shuttle init
 ```
 
-3. Add your OpenAI API key to Shuttle secrets:
-```bash
-cargo shuttle secrets set OPENAI_API_KEY=your-api-key-here
-```
-
-4. Build the frontend for production:
+3. Build the frontend for production:
 ```bash
 cd frontend
 npm run build
 cd ..
 ```
 
-5. Deploy the application:
+4. Deploy the application:
 ```bash
-cargo shuttle deploy
+shuttle deploy
 ```
 
-Once deployed, your application will be available at `https://cyber-dad-joke-machine-<nonce>.shuttleapp.rs`
+Once deployed, your application will be available at `https://cyber-dad-joke-machine-<nonce>.shuttleapp`
 
 The deployment includes both the backend API and the frontend application, served from the same origin.
 
